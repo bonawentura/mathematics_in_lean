@@ -12,12 +12,18 @@ end
 
 example (a b c : ℝ) : (c * b) * a = b * (a * c) :=
 begin
-  sorry
+   rw ←mul_assoc,
+   conv
+   begin 
+    to_rhs,
+    rw mul_comm,
+    rw ←mul_assoc,
+   end,
 end
 
 example (a b c : ℝ) : a * (b * c) = b * (a * c) :=
 begin
-  sorry
+  by linarith,
 end
 
 /- An example. -/
