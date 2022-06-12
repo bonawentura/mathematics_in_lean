@@ -137,7 +137,6 @@ end
 
 end
 
--- @end
 
 section
 variables {α : Type*} {R : Type*} [ordered_cancel_add_comm_monoid R]
@@ -173,11 +172,25 @@ example (mf : monotone f) (mg : monotone g) :
 
 example {c : ℝ} (mf : monotone f) (nnc : 0 ≤ c) :
   monotone (λ x, c * f x) :=
-sorry
+begin
+  intros a b aleb,
+  dsimp,
+  apply mul_le_mul_of_nonneg_left,
+  apply mf aleb,
+  apply nnc,
+  
+end
 
 example (mf : monotone f) (mg : monotone g) :
   monotone (λ x, f (g x)) :=
-sorry
+λ a b aleb, mf $ mg $ aleb
+-- begin
+--   intros a b aleb,
+--   dsimp,
+--   apply mf,
+--   apply mg,
+--   apply aleb,
+-- end
 
 def fn_even (f : ℝ → ℝ) : Prop := ∀ x, f x = f (-x)
 def fn_odd (f : ℝ → ℝ) : Prop := ∀ x, f x = - f (-x)
@@ -191,13 +204,28 @@ begin
 end
 
 example (of : fn_odd f) (og : fn_odd g) : fn_even (λ x, f x * g x) :=
-sorry
+begin
+  intros a,
+  dsimp,
+  rw [of,og, neg_mul_neg],
+  
+end
 
 example (ef : fn_even f) (og : fn_odd g) : fn_odd (λ x, f x * g x) :=
-sorry
+begin
+  intros a,
+  dsimp,
+  rw [ef, og, neg_mul_eq_mul_neg],
+
+end
 
 example (ef : fn_even f) (og : fn_odd g) : fn_even (λ x, f (g x)) :=
-sorry
+begin
+  intros a,
+  dsimp,
+  rw [ef, og, neg_neg],
+
+end
 
 end
 
@@ -210,7 +238,12 @@ by { intros x xs, exact xs }
 theorem subset.refl : s ⊆ s := λ x xs, xs
 
 theorem subset.trans : r ⊆ s → s ⊆ t → r ⊆ t :=
-sorry
+begin
+intros hrs hst hr hrr,
+apply hst,
+apply hrs,
+apply hrr,
+end
 
 end
 
@@ -222,8 +255,14 @@ variables (s : set α) (a b : α)
 def set_ub (s : set α) (a : α) := ∀ x, x ∈ s → x ≤ a
 
 example (h : set_ub s a) (h' : a ≤ b) : set_ub s b :=
-sorry
-
+begin
+  intros a' ha's,
+  have alea' : a' <= a  := begin
+    apply h,
+    apply ha's,
+  end,
+  apply le_trans alea' h',
+end
 end
 
 section
@@ -236,13 +275,26 @@ begin
 end
 
 example {c : ℝ} (h : c ≠ 0) : injective (λ x, c * x) :=
-sorry
+begin
+  intros x a,
+  dsimp,
+  intro hcxa,
+  apply (mul_right_inj' h).mp hcxa,
+end
+
 
 variables {α : Type*} {β : Type*} {γ : Type*}
 variables {g : β → γ} {f : α → β}
 
 example (injg : injective g) (injf : injective f) :
   injective (λ x, g (f x)) :=
-sorry
+begin
+  intros a a',
+  dsimp,
+  intro h,
+  apply injf,
+  apply injg,
+  apply h,
+end
 
 end
