@@ -1,4 +1,8 @@
 import data.real.basic
+import algebra.order.with_zero
+import algebra.order.monoid
+
+set_option trace.linarith true
 
 section
 variables a b : ℝ
@@ -30,10 +34,24 @@ begin
 end
 
 example (h : ∀ a, ∃ x, f x < a) : ¬ fn_has_lb f :=
-sorry
+begin
+  intros hlbf,
+  cases hlbf with a' ha',
+  cases h a' with a'' ha'',
+  have : a' <= f a'', from ha' a'',
+  linarith,
+
+end
 
 example : ¬ fn_has_ub (λ x, x) :=
-sorry
+begin
+  intros h,
+  cases h with x' hub,
+  rw [fn_ub] at hub,
+  have : x' + 1 <= x', from hub (x' + 1),
+  linarith,
+
+end
 
 #check (not_le_of_gt : a > b → ¬ a ≤ b)
 #check (not_lt_of_ge : a ≥ b → ¬ a < b)
@@ -41,10 +59,27 @@ sorry
 #check (le_of_not_gt : ¬ a > b → a ≤ b)
 
 example (h : monotone f) (h' : f a < f b) : a < b :=
-sorry
+begin
+  apply lt_of_not_ge,
+  intro h2,
+  apply absurd h',
+
+  apply not_lt_of_ge,
+  apply h h2,
+
+end
 
 example (h : a ≤ b) (h' : f b < f a) : ¬ monotone f :=
-sorry
+begin
+  intros hmf,
+  apply absurd h',
+  apply not_lt_of_ge,
+  apply hmf h,
+end
+
+-- #check (<=)
+-- #set_option trace.linarith true
+
 
 example :
   ¬ ∀ {f : ℝ → ℝ}, monotone f → ∀ {a b}, f a ≤ f b → a ≤ b :=
@@ -52,16 +87,45 @@ begin
   intro h,
   let f := λ x : ℝ, (0 : ℝ),
   have monof : monotone f,
-  { sorry },
+  { 
+    rw monotone,
+    intros a' b' hab',
+    have hfa0 : f a' = 0 := rfl,
+    have hfb0 : f b' = 0 := rfl,
+    rw [hfa0],
+  },
   have h' : f 1 ≤ f 0,
     from le_refl _,
-  sorry
+  have h1: (1: ℝ ) <= 0 := h monof h',
+  -- linarith,
+  -- rw [le_zero_iff 1] at h1,
+  -- rw [] at h1,
+  -- rw [ le_iff_exists_add ] at h1
+  -- apply 
+  -- apply absurd h1,
+  -- apply not_le_of_gt h1,
+  linarith,
+  
+  -- apply (not_le 1 0).2,
+  -- todo: try step by step
 end
 
 example (x : ℝ) (h : ∀ ε > 0, x < ε) : x ≤ 0 :=
-sorry
+begin 
+  apply le_of_not_gt,
+  intro h1,
+  -- apply absurd h1,
+  let hx := h _ h1,
+  -- linarith [h _ h1]
+  apply lt_irrefl x,
+  apply hx,
+  
 
 end
+
+end
+-- @end
+
 
 section
 variables {α : Type*} (P : α → Prop) (Q : Prop)
