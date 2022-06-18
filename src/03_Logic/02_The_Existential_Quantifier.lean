@@ -78,8 +78,8 @@ begin
   use (c * b),
   apply hubfcb,
 end
- -------- @end
- 
+-- @ start 
+
 example (ubf : fn_has_ub f) (ubg : fn_has_ub g) :
   fn_has_ub (λ x, f x + g x) :=
 begin
@@ -130,16 +130,29 @@ end
 section
 variables {a b c : ℕ}
 
+#check (∣)
+
 example (divab : a ∣ b) (divbc : b ∣ c) : a ∣ c :=
 begin
-  cases divab with d beq,
-  cases divbc with e ceq,
-  rw [ceq, beq],
-  use (d * e), ring
+  -- cases divab with d beq,
+  -- cases divbc with e ceq,
+  -- rw [ceq, beq],
+  -- use (d * e), ring
+  rcases divab with ⟨d, hdivab, rfl⟩,
+  rcases divbc with ⟨e, hdivbc, rfl⟩,
+  use (d*e),
+  apply mul_assoc,
 end
 
 example (divab : a ∣ b) (divac : a ∣ c) : a ∣ (b + c) :=
-sorry
+begin
+  cases divab with d hbeq,
+  cases divac with e hceq,
+  rw [hbeq, hceq],
+  rw [←mul_add],
+  use (d + e),
+
+end
 
 end
 
@@ -154,7 +167,16 @@ begin
 end
 
 example {c : ℝ} (h : c ≠ 0) : surjective (λ x, c * x) :=
-sorry
+begin
+  intros x,
+  use (x/c),
+  dsimp,
+  by calc c * (x/c) = c*x/c : by ring
+  ... = (c/c) * x : by ring
+  ... = x : by simp [h],
+end
+
+
 
 example (x y : ℝ) (h : x - y ≠ 0) : (x^2 - y^2) / (x - y) = x + y :=
 by { field_simp [h], ring }
@@ -176,6 +198,13 @@ variables {g : β → γ} {f : α → β}
 
 example (surjg : surjective g) (surjf : surjective f) :
   surjective (λ x, g (f x)) :=
-sorry
+begin
+intros xg,
+dsimp,
+cases surjg xg with b1 h1,
+cases surjf b1 with a1 h2,
+use a1,
+rw [h2, h1],
+end
 
 end
