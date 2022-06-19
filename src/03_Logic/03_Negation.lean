@@ -131,16 +131,36 @@ section
 variables {α : Type*} (P : α → Prop) (Q : Prop)
 
 example (h : ¬ ∃ x, P x) : ∀ x, ¬ P x :=
-sorry
+begin
+  intros a hp,
+  apply h,
+  use a,
+  apply hp,
+end
 
 example (h : ∀ x, ¬ P x) : ¬ ∃ x, P x :=
-sorry
+begin
+  intros hpx,
+  cases hpx with a ha,
+  apply h a,
+  apply ha,
+end
+
+#check @exists.elim
 
 example (h : ¬ ∀ x, P x) : ∃ x, ¬ P x :=
-sorry
+begin 
+    sorry
+    
+end
 
 example (h : ∃ x, ¬ P x) : ¬ ∀ x, P x :=
-sorry
+begin 
+  intros ha,
+  cases h with a' hpa,
+  apply hpa,
+  apply ha a',
+end
 
 open_locale classical
 
@@ -155,10 +175,20 @@ begin
 end
 
 example (h : ¬ ¬ Q) : Q :=
-sorry
+begin
+  by_contra h',
+  apply h,
+  apply h',
+end
 
 example (h : Q) : ¬ ¬ Q :=
-sorry
+begin
+  -- by_contra h',
+  -- apply h',
+  -- apply h,
+  rw not_not,
+  apply h,
+end
 
 end
 
@@ -167,7 +197,19 @@ section
 variable (f : ℝ → ℝ)
 
 example (h : ¬ fn_has_ub f) : ∀ a, ∃ x, f x > a :=
-sorry
+begin
+  intros a,
+  by_contra h',
+  apply h,
+  -- rw [fn_has_ub],
+  use a,
+  intro x,
+  apply le_of_not_gt,
+  intro h'',
+  apply h',
+  use x,
+  apply h'',
+end
 
 example (h : ¬ ∀ a, ∃ x, f x > a) : fn_has_ub f :=
 begin
@@ -183,7 +225,11 @@ begin
 end
 
 example (h : ¬ monotone f) : ∃ x y, x ≤ y ∧ f y < f x :=
-sorry
+begin
+  simp only [monotone] at h,
+  push_neg at h,
+  apply h,
+end
 
 example (h : ¬ fn_has_ub f) : ∀ a, ∃ x, f x > a :=
 begin
