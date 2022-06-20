@@ -27,13 +27,31 @@ end
 namespace my_abs
 
 theorem le_abs_self (x : ℝ) : x ≤ abs x :=
-sorry
+begin
+  cases le_or_gt 0 x,
+  rw abs_of_nonneg h,
+
+  rw abs_of_neg h,
+  linarith, 
+end
 
 theorem neg_le_abs_self (x : ℝ) : -x ≤ abs x :=
-sorry
+begin
+  cases le_or_gt 0 x,
+  rw abs_of_nonneg h,
+  linarith,
+  rw abs_of_neg h,
+
+end
 
 theorem abs_add (x y : ℝ) : abs (x + y) ≤ abs x + abs y :=
-sorry
+begin
+  cases lt_or_ge (x + y) 0,
+  rw abs_of_neg h,
+  linarith [neg_abs_le_self x, neg_abs_le_self y],
+  rw abs_of_nonneg h,
+  linarith [le_abs_self x, le_abs_self y],
+end
 
 theorem lt_abs : x < abs y ↔ x < y ∨ x < -y :=
 sorry
