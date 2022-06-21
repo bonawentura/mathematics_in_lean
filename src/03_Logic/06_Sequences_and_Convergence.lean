@@ -35,7 +35,29 @@ begin
   cases cs (ε / 2) ε2pos with Ns hs,
   cases ct (ε / 2) ε2pos with Nt ht,
   use max Ns Nt,
-  sorry
+  intros n' hnge,
+  have hn'geNs: n' >= Ns := by finish,
+  have hs' := hs n' hn'geNs,
+  have hn'geNt: n' >= Nt := by finish,
+  have ht' := ht n' hn'geNt,
+  have hsum:  |s n' + t n' - (a +b)| <= |s n' - a| + |t n' - b| := by
+    begin
+       convert abs_add (s n' - a) (t n' - b),
+       linarith,
+
+    end,
+  calc |s n' + t n' - (a + b)| <= |s n' - a| + |t n' - b| : by apply hsum
+  ... < ε /2 + ε / 2 : by 
+    begin
+      apply add_lt_add hs' ht',
+    end
+  ... = ε : by norm_num,
+end
+
+lemma lt_mul_pos {a b c: ℝ} : (0 < c) -> (b < a) -> b * c < a * c :=
+begin
+  intros hc1 blta,
+  nlinarith,
 end
 
 theorem converges_to_mul_const {s : ℕ → ℝ} {a : ℝ}
@@ -48,7 +70,23 @@ begin
     rw [h, zero_mul] },
   have acpos : 0 < abs c,
     from abs_pos.mpr h,
-  sorry
+  intros ε εpos,
+  have εcpos: 0 < ε/(abs c) := 
+    begin
+      have hε: 0 < 1 / abs c := by apply one_div_pos.mpr acpos,
+      have : 0 < ε * (1 / abs c) := by apply mul_pos εpos hε,
+      calc 0 < ε * (1 / abs c) : this
+      ... = ε / abs c : by ring
+    end,
+  dsimp,
+  cases cs (ε/abs c) εcpos with Ns hs,
+  use Ns,
+  intros n' hn'geNs,
+  have hs' : |s n' - a| < ε/abs c := hs n' hn'geNs,
+  have : |s n' - a| * abs c < (ε/abs c) * (abs c) := by apply lt_mul_pos (acpos) hs',
+  simp [*] at this,
+  rw [←abs_mul, mul_comm, mul_sub] at this,
+  apply this,
 end
 
 theorem exists_abs_le_of_converges_to {s : ℕ → ℝ} {a : ℝ}
