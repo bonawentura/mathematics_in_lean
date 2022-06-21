@@ -54,10 +54,68 @@ begin
 end
 
 theorem lt_abs : x < abs y ↔ x < y ∨ x < -y :=
-sorry
+begin
+  split,
+  intros hmp,
+    cases lt_or_ge y 0,
+      rw [abs_of_neg] at hmp,
+      apply or.inr hmp,
+      apply h,
+
+      rw abs_of_nonneg at hmp,
+      apply or.inl hmp,
+      apply h,
+
+  intros hmpr,
+    cases hmpr,
+      cases lt_or_ge y 0,
+        rw abs_of_neg,
+        linarith,
+        apply h,
+
+        rw abs_of_nonneg,
+        apply hmpr,
+        apply h,
+
+      cases lt_or_ge y 0,
+        rw abs_of_neg,
+        apply hmpr,
+        apply h,
+
+        rw abs_of_nonneg,
+        linarith,
+        apply h,
+end
 
 theorem abs_lt : abs x < y ↔ - y < x ∧ x < y :=
-sorry
+begin
+  split,
+  intros hmp,
+  {
+    cases lt_or_ge x 0,
+      { 
+        rw [abs_of_neg h] at hmp,
+        split,
+        linarith,
+        linarith,
+      },
+      {
+        rw [abs_of_nonneg h] at hmp,
+        split,
+        linarith,
+        linarith, 
+      },
+  },
+  intros hmpr,
+  {
+    cases lt_or_ge x 0,
+      rw abs_of_neg h,
+      linarith,
+
+      rw abs_of_nonneg h,
+      linarith,      
+  }
+end
 
 end my_abs
 end
@@ -81,10 +139,18 @@ end
 
 example {z : ℝ} (h : ∃ x y, z = x^2 + y^2 ∨ z = x^2 + y^2 + 1) :
   z ≥ 0 :=
-sorry
+begin
+  rcases h with ⟨x, y, rfl | rfl⟩; linarith [sq_nonneg x, sq_nonneg y],
+
+end
+
+#check @eq_zero_or_eq_zero_of_mul_eq_zero
+#check @no_zero_divisors
 
 example {x : ℝ} (h : x^2 = 1) : x = 1 ∨ x = -1 :=
+begin
 sorry
+end
 
 example {x y : ℝ} (h : x^2 = y^2) : x = y ∨ x = -y :=
 sorry
@@ -120,7 +186,25 @@ begin
   contradiction
 end
 
+#check @or.elim
+
 example (P Q : Prop) : (P → Q) ↔ ¬ P ∨ Q :=
-sorry
+begin
+    split,
+      
+      intro h,
+      by_cases h' : P,
+      apply or.inr ( h h' ),
+      left,
+      apply h',
+
+      rintros (h1 | h2),
+      intro h',
+      apply absurd h' h1,
+
+      intro h',
+      apply h2,
+
+end
 
 end
