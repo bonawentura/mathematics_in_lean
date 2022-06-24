@@ -1,4 +1,5 @@
 import data.real.basic
+import algebra
 
 def converges_to (s : ℕ → ℝ) (a : ℝ) :=
 ∀ ε > 0, ∃ N, ∀ n ≥ N, abs (s n - a) < ε
@@ -95,7 +96,14 @@ theorem exists_abs_le_of_converges_to {s : ℕ → ℝ} {a : ℝ}
 begin
   cases cs 1 zero_lt_one with N h,
   use [N, abs a + 1],
-  sorry
+  intros n' hNlen,
+  have : |s n' - a| < 1 := h n' hNlen,
+  have : |s n' - a| + |a| < 1 + |a| := by apply add_lt_add_right this,
+  have := calc 
+    1 + |a| > |s n' - a| + |a| : this
+        ... >=  |s n' - a + a| : by apply abs_add 
+        ... = |s n'| : by norm_num,
+  finish,
 end
 
 lemma aux {s t : ℕ → ℝ} {a : ℝ}
@@ -109,7 +117,26 @@ begin
   have pos₀ : ε / B > 0,
     from div_pos εpos Bpos,
   cases ct _ pos₀ with N₁ h₁,
-  sorry
+  let Nₘ := max N₀ N₁,
+  use Nₘ,
+  intros n' hNn',
+  simp,
+  simp at h₁,
+  have nm0 : n' >= N₀ := by finish,
+  have nm1 : n' >= N₁ := by finish,
+  have hct := h₁ n' nm1,
+  have hlecs: |s n'| <= B := by apply le_of_lt (h₀ n' nm0),
+  have hltct: |t n'| < ε / B := h₁ n' nm1,
+  have := mul_lt_mul' (hlecs) hltct (abs_nonneg _) Bpos,
+  have εsimp: B * (ε / B) = ε := begin 
+      rw [← mul_div_assoc B ε B],
+        have Bneq0 : B ≠ 0 := by nlinarith,
+      calc 
+        B * ε / B = ε * B / B : by ring
+              ... = ε : by rw mul_div_cancel ε Bneq0,
+  end,
+  rw [←abs_mul, εsimp] at this,
+  exact this,
 end
 
 theorem converges_to_mul {s t : ℕ → ℝ} {a b : ℝ}
