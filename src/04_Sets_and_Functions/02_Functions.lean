@@ -1,6 +1,8 @@
 import data.set.lattice
 import data.set.function
-import analysis.special_functions.log
+import data.real.basic
+import analysis.special_functions.log.base
+-- import analysis.convex.topology
 
 section
 
@@ -32,17 +34,55 @@ begin
   use [x, xs]
 end
 
+-- #check ('') 
+
 example : f '' s ⊆ v ↔ s ⊆ f ⁻¹' v :=
-sorry
+begin
+  split,
+    rintros h x xs,
+    have : f x ∈ f '' s := mem_image_of_mem _ xs,
+    have : f x ∈ v := by apply h this,
+    apply this,
+
+    rintros h y ys,
+    rcases ys with ⟨x, xs, xeq⟩,
+    have hx : x ∈ preimage f v := h xs,
+    rw [←xeq],
+    apply hx,
+  
+end
 
 example (h : injective f) : f ⁻¹' (f '' s) ⊆ s :=
-sorry
+begin
+  intros x hx,
+  rcases hx with ⟨x', xs, hx⟩,
+  -- have : x' = x := h hx,
+  -- rw ←this,
+  -- apply xs,
+  rwa [←(h hx)],
+
+end
 
 example : f '' (f⁻¹' u) ⊆ u :=
-sorry
+begin
+  intros y hx,
+  rcases hx with ⟨x, xmem, xeq⟩,
+  rwa ←xeq,
+end
 
 example (h : surjective f) : u ⊆ f '' (f⁻¹' u) :=
-sorry
+begin
+  intros y yu,
+  have := h y,
+
+  rcases h y with ⟨x, heq⟩,
+  rwa [←heq],
+  use x,
+  split,
+  rw [←heq] at yu,
+  apply yu,
+  refl,
+end
 
 example (h : s ⊆ t) : f '' s ⊆ f '' t :=
 sorry
