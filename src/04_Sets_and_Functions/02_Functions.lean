@@ -20,7 +20,12 @@ example : f '' (s ∪ t) = f '' s ∪ f '' t :=
 begin
   ext y, split,
   { rintros ⟨x, xs | xt, rfl⟩,
-    { left, use [x, xs] },
+    { 
+      left, 
+      -- have := by use [x, xs],
+      have := f '' s,
+      use [x, xs], 
+    },
     right, use [x, xt] },
   rintros (⟨x, xs, rfl⟩ | ⟨x, xt, rfl⟩),
   { use [x, or.inl xs] },
@@ -85,10 +90,21 @@ begin
 end
 
 example (h : s ⊆ t) : f '' s ⊆ f '' t :=
-sorry
+begin
+  intros y hy,
+  rcases hy with ⟨x, xs, xeq⟩,
+  rw ←xeq,
+  have xt : x ∈ t := h xs,
+  use [x, xt],
+end
 
 example (h : u ⊆ v) : f ⁻¹' u ⊆ f ⁻¹' v :=
-sorry
+begin
+  intros x hx,
+  have xu : f x ∈ u := hx,
+  simp,
+  exact h xu,
+end
 
 example : f ⁻¹' (u ∪ v) = f ⁻¹' u ∪ f ⁻¹' v :=
 sorry
@@ -163,6 +179,7 @@ end
 section
 open set real
 
+
 example : inj_on log { x | x > 0 } :=
 begin
   intros x xpos y ypos,
@@ -184,16 +201,58 @@ begin
 end
 
 example : inj_on sqrt { x | x ≥ 0 } :=
-sorry
+begin
+  intros x xnneg y ynneg heq,
+  have hx : sqrt x ≥ 0 := sqrt_nonneg x,
+  have hy : sqrt y ≥ 0 := sqrt_nonneg y,
+  have hsqrteq:= (sq_eq_sq hx hy).mpr heq,
+  have hxsq: sqrt x ^ 2 = x := sq_sqrt xnneg,
+  have hysq := sq_sqrt ynneg,
+  rwa [←hysq, ←hxsq],
+end
 
 example : inj_on (λ x, x^2) { x : ℝ | x ≥ 0 } :=
-sorry
+begin
+  intros x xnneg y ynneg ,
+  dsimp,
+  intros h,
+  calc 
+      x = sqrt (x ^ 2) : by rw sqrt_sq xnneg
+    ... = sqrt (y ^ 2) : by rw h
+    ... = y : by rw sqrt_sq ynneg,
+end
 
 example : sqrt '' { x | x ≥ 0 } = {y | y ≥ 0} :=
-sorry
+begin
+  ext x,
+  split,
+    rintros ⟨u, ⟨unneg, squeq⟩⟩, 
+    rw ←squeq,
+    apply sqrt_nonneg,
+
+    rintros hx,
+    use x^2,
+    dsimp at *,
+    split,
+      apply pow_nonneg hx,
+      apply sqrt_sq hx,
+end
 
 example : range (λ x, x^2) = {y : ℝ  | y ≥ 0} :=
-sorry
+begin
+  ext y,
+  dsimp,
+  split,
+    rintros ⟨x, fxeq⟩,
+    dsimp at fxeq,
+    rw ←fxeq,
+    apply sq_nonneg,
+
+    intros ynneg,
+    simp,
+    use sqrt y,
+    apply sq_sqrt ynneg,
+end
 
 end
 
