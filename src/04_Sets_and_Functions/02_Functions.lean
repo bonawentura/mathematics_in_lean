@@ -2,7 +2,6 @@ import data.set.lattice
 import data.set.function
 import data.real.basic
 import analysis.special_functions.log.base
--- import analysis.convex.topology
 
 section
 
@@ -273,6 +272,14 @@ open_locale classical
 def inverse (f : α → β) : β → α :=
 λ y : β, if h : ∃ x, f x = y then classical.some h else default
 
+-- #print inverse
+
+-- def tst (a : ℕ) := (λ x, if x > 1 then x else 1) a
+
+-- #eval tst 0
+
+-- #check tst
+
 theorem inverse_spec {f : α → β} (y : β) (h : ∃ x, f x = y) :
   f (inverse f y) = y :=
 begin
@@ -283,11 +290,46 @@ end
 variable  f : α → β
 open function
 
+#print left_inverse 
+#print right_inverse 
+#print dite
+
 example : injective f ↔ left_inverse (inverse f) f  :=
-sorry
+begin
+  split,
+  {
+    rintros injf x,
+    apply injf,
+    apply inverse_spec,
+    use x,
+  },
+  {
+    rintros h x1 x2 feq,
+    have := h x1,
+    rw [←h x1, ←h x2],
+    rw feq,
+  }
+  
+  
+end
 
 example : surjective f ↔ right_inverse (inverse f) f :=
-sorry
+begin
+  split,
+  {
+    rintros h y,
+    cases h y with x e,
+    apply inverse_spec,
+    use [x, e],
+  },
+  {
+    rintros h y,
+    use (inverse f y),
+    apply h,
+  },
+
+
+end
 
 end
 
@@ -306,9 +348,14 @@ begin
       { by rwa h at h' },
     contradiction },
   have h₂ : j ∈ S,
-    sorry,
+    {
+      contradiction,
+    },
   have h₃ : j ∉ S,
-    sorry,
+    {
+      rw h at h₁,
+      contradiction,
+    },
   contradiction
 end
 
