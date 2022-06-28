@@ -51,19 +51,35 @@ example {m n : ℕ} (coprime_mn : m.coprime n) : m^2 ≠ 2 * n^2 :=
 begin
   intro sqr_eq,
   have : 2 ∣ m,
-    sorry,
+    {
+      apply even_of_even_sqr,
+      rw sqr_eq,
+      apply nat.dvd_mul_right
+    },
   obtain ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp this,
   have : 2 * (2 * k^2) = 2 * n^2,
   { rw [←sqr_eq, meq], ring },
   have : 2 * k^2 = n^2,
-    sorry,
+    by linarith,
   have : 2 ∣ n,
-    sorry,
+    {
+      apply even_of_even_sqr,
+      rw ←this,
+      apply nat.dvd_mul_right,
+    },
   have : 2 ∣ m.gcd n,
-    sorry,
+    {
+      obtain ⟨l, neq⟩ := dvd_iff_exists_eq_mul_left.mp this,
+      rw [meq, neq, nat.gcd_mul_right],
+      exact dvd_mul_left 2 _,
+    },
   have : 2 ∣ 1,
-    sorry,
-  norm_num at this
+    {
+     convert this,
+     symmetry,
+     exact coprime_mn,
+    },
+  norm_num at this,
 end
 
 example {m n p : ℕ} (coprime_mn : m.coprime n) (prime_p : p.prime) : m^2 ≠ p * n^2 :=
@@ -74,16 +90,16 @@ example {m n p : ℕ} (coprime_mn : m.coprime n) (prime_p : p.prime) : m^2 ≠ p
 #check nat.prod_factors
 #check nat.factors_unique
 
-#check @nat.count_factors_mul_of_pos
-#check @nat.factors_count_pow
+-- #check nat.count_factors_mul_of_pos
+-- #check @nat.factors_count_pow
 #check @nat.factors_prime
 
-example (m n p : ℕ) (mpos : 0 < m) (npos : 0 < n) :
-  (m * n).factors.count p = m.factors.count p + n.factors.count p :=
-nat.count_factors_mul_of_pos mpos npos
+-- example (m n p : ℕ) (mpos : 0 < m) (npos : 0 < n) :
+--   (m * n).factors.count p = m.factors.count p + n.factors.count p :=
+-- nat.count_factors_mul_of_pos mpos npos
 
-example (n k p : ℕ) : (n^k).factors.count p = k * n.factors.count p :=
-nat.factors_count_pow
+-- example (n k p : ℕ) : (n^k).factors.count p = k * n.factors.count p :=
+-- nat.factors_count_pow
 
 example (p : ℕ) (prime_p : p.prime) : p.factors.count p = 1 :=
 begin
