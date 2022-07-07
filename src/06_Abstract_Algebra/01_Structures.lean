@@ -99,7 +99,13 @@ example : ∀ a b : point, add a b = add b a :=
 
 protected theorem add_assoc (a b c : point) :
   (a.add b).add c = a.add (b.add c) :=
-sorry
+begin
+  set p1 := (a.add b).add c,
+  set p2 := a.add (b.add c),
+  ext,
+  repeat {  simp [p1, p2, add, add_comm, add_assoc] },
+
+end
 
 def smul (r : ℝ) (a : point) : point :=
 sorry
