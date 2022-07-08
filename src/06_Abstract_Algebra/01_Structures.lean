@@ -107,12 +107,14 @@ begin
 
 end
 
-def smul (r : ℝ) (a : point) : point :=
-sorry
+def smul (r : ℝ) (a : point) : point := ⟨ r * a.x, r * a.y, r * a.z ⟩ 
+
 
 theorem smul_distrib (r : ℝ) (a b : point) :
   (smul r a).add (smul r b) = smul r (a.add b) :=
-sorry
+begin
+  simp [add, smul, mul_add],
+end
 
 end point
 
@@ -151,7 +153,14 @@ def weighted_average (lambda : real)
     (lambda_nonneg : 0 ≤ lambda) (lambda_le : lambda ≤ 1)
     (a b : standard_two_simplex) :
   standard_two_simplex :=
-sorry
+{
+  x := lambda * a.x + (1 - lambda) * b.x,
+  y := lambda * a.y + (1 - lambda) * b.y,
+  x := lambda * a.z + (1 - lambda) * b.z,
+  x_nonneg := begin
+  
+  end,
+}
 
 end standard_two_simplex
 
