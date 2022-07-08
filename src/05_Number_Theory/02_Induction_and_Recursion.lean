@@ -41,7 +41,27 @@ theorem pow_two_le_fac (n : ℕ) : 2^(n-1) ≤ fac n :=
 begin
   cases n with n,
   { simp [fac] },
-  sorry
+  induction n with n ih,
+    repeat {rw [fac]},
+    norm_num,
+
+    have hn : n.succ - 1 = n := by simp,
+    have hadd : n.succ = n + 1 := by simp,
+    have hnn : n.succ.succ - 1 = n.succ := by simp,
+    have hnp : 2^n.succ = (2^n) * 2 := pow_succ' 2 n,
+    have hf : (n+1) * fac n = fac (n + 1) := by simp [fac],
+    
+    rw hn at ih,
+    rw hnn,
+    rw hnp,
+
+    rw [hf, mul_comm],
+    apply nat.mul_le_mul _ ih,
+    rw [←nat.add_one],
+    
+    change 2 ≤ n + 2,
+    exact le_add_self,
+
 end
 
 section
@@ -53,6 +73,11 @@ variables {α : Type*} (s : finset ℕ) (f : ℕ → ℕ) (n : ℕ)
 
 open_locale big_operators
 open finset
+
+def tmpFn (n :ℕ) := (range n).sum (λx, x )
+def tmp2 (n:ℕ ) := ∑ x in (range n), (λx, x) x
+
+#eval tmpFn 2
 
 example : s.sum f = ∑ x in s, f x := rfl
 example : s.prod f = ∏ x in s, f x := rfl
@@ -85,6 +110,7 @@ by simp [mul_assoc, mul_comm, mul_left_comm]
 
 theorem sum_id (n : ℕ) : ∑ i in range (n + 1), i = n * (n + 1) / 2 :=
 begin
+  -- have := (by norm_num : 0 < 2),
   symmetry, apply nat.div_eq_of_eq_mul_right (by norm_num : 0 < 2),
   induction n with n ih,
   { simp },
@@ -93,7 +119,19 @@ begin
 end
 
 theorem sum_sqr (n : ℕ) : ∑ i in range (n + 1), i^2 = n * (n + 1) * (2 *n + 1) / 6 :=
-sorry
+begin
+  symmetry, apply nat.div_eq_of_eq_mul_right (by norm_num : 0 < 6),
+  induction n with n ih,
+  { simp },
+  have hsum : 6*∑ (i : ℕ) in range (n.succ + 1), i ^ 2 = 6*((∑ (i : ℕ) in range (n + 1), i ^ 2) + (n + 1)^2) := begin
+    simp [finset.sum_range_succ], 
+  end,
+  rw [hsum],
+  rw mul_add 6,
+  rw ←ih,
+  repeat {rw [←nat.add_one]},
+  ring,
+end
 
 end
 

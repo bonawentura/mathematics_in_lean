@@ -54,21 +54,42 @@ begin
   use [p, pp, pdvd.trans mdvdn]
 end
 
+#check nat.factorial_pos
+#check @nat.dvd_factorial
+#check @nat.dvd_sub
+-- #check nat.
+-- variable n : ℕ
+-- #check  (prime n).pos
+
 theorem primes_infinite : ∀ n, ∃ p > n, nat.prime p :=
 begin
   intro n,
   have : 2 ≤ nat.factorial (n + 1) + 1,
-    sorry,
+    begin
+      apply nat.succ_le_succ,
+      apply nat.succ_le_of_lt (nat.factorial_pos _), 
+    end,
   rcases exists_prime_factor this with ⟨p, pp, pdvd⟩,
   refine ⟨p, _, pp⟩,
   show p > n,
   by_contradiction ple, push_neg at ple,
   have : p ∣ nat.factorial (n + 1),
-    sorry,
+    begin
+       apply nat.dvd_factorial,
+       have := pp.pos,
+       apply pp.pos,
+       linarith,
+    end,
   have : p ∣ 1,
-    sorry,
+    begin
+      convert nat.dvd_sub' pdvd this,
+      simp,
+    end,
   show false,
-    sorry
+    begin
+      have := nat.le_of_dvd zero_lt_one this,
+      linarith [pp.two_le]
+    end
 end
 
 open finset
