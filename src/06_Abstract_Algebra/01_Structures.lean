@@ -149,6 +149,9 @@ def midpoint (a b : standard_two_simplex) : standard_two_simplex :=
   z_nonneg := div_nonneg (add_nonneg a.z_nonneg b.z_nonneg) (by norm_num),
   sum_eq   := by { field_simp, linarith [a.sum_eq, b.sum_eq]} }
 
+
+#check @sub_nonneg
+
 def weighted_average (lambda : real)
     (lambda_nonneg : 0 ≤ lambda) (lambda_le : lambda ≤ 1)
     (a b : standard_two_simplex) :
@@ -156,10 +159,23 @@ def weighted_average (lambda : real)
 {
   x := lambda * a.x + (1 - lambda) * b.x,
   y := lambda * a.y + (1 - lambda) * b.y,
-  x := lambda * a.z + (1 - lambda) * b.z,
+  z := lambda * a.z + (1 - lambda) * b.z,
   x_nonneg := begin
-  
+    have hx1 : 1 - lambda >= 0 := by simp [lambda_le],
+    have ha : lambda * a.x >= 0 := by simp [lambda_nonneg, a.x_nonneg, mul_nonneg],
+    have hb : (1 - lambda) * b.x >= 0 := mul_nonneg hx1 b.x_nonneg,
+    exact add_nonneg ha hb,
   end,
+  y_nonneg := add_nonneg (mul_nonneg lambda_nonneg a.y_nonneg) (mul_nonneg (sub_nonneg.mpr lambda_le) b.y_nonneg),
+  z_nonneg := by simp [lambda_nonneg, a.z_nonneg, b.z_nonneg, lambda_le, mul_nonneg, add_nonneg, sub_nonneg],
+  sum_eq := begin
+    simp [sub_mul, ←add_sub_assoc, ←add_assoc],
+    calc 
+      lambda * a.x + b.x - lambda * b.x + lambda * a.y + b.y - lambda * b.y + lambda * a.z + b.z - lambda * b.z = lambda * (a.x - b.x + a.y - b.y + a.z - b.z) + b.x + b.y + b.z : by simp
+      ... = lambda * ( 1 - 1) + 1 : by simp [a.sum_eq, b.sum_eq]
+      ... = lambda * 0 + 1 : by linarith
+      ... = 1 : by linarith
+  end
 }
 
 end standard_two_simplex
@@ -228,6 +244,10 @@ def standard_simplex' (n : ℕ) :=
 { v : fin n → ℝ // (∀ i : fin n, 0 ≤ v i) ∧ (∑ i, v i = 1) }
 
 def std_simplex := Σ n : ℕ, standard_simplex n
+
+variable g : standard_two_simplex'
+#check g.val
+#check g.property
 
 section
 variable s : std_simplex

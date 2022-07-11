@@ -48,7 +48,12 @@ def perm_group {α : Type*} : group₁ (equiv.perm α) :=
 
 structure add_group₁ (α : Type*) :=
 (add : α → α → α)
--- fill in the rest
+(zero : α)
+(neg : α → α)
+(add_assoc : ∀ x y z : α, add (add x y) z = add x (add y z))
+(add_zero : ∀ a : α, add a zero = a)
+(zero_add : ∀ x : α, add zero x = x)
+(add_left_neg : ∀ x : α, add ( neg x) x = zero)
 
 @[ext] structure point := (x : ℝ) (y : ℝ) (z : ℝ)
 
@@ -56,11 +61,19 @@ namespace point
 
 def add (a b : point) : point := ⟨a.x + b.x, a.y + b.y, a.z + b.z⟩
 
-def neg (a b : point) : point := sorry
+def neg (a : point) : point := ⟨ -a.x, -a.y, -a.z ⟩
 
-def zero : point := sorry
+def zero : point := ⟨0, 0, 0⟩
 
-def add_group_point : add_group point := sorry
+def add_group_point : add_group₁ point := {
+  add           := point.add,
+  zero          := point.zero,
+  neg           := point.neg,
+  add_assoc     := by simp [point.add, add_assoc],
+  add_zero      := by simp [point.add, point.zero]; intro; ext; refl,
+  zero_add      := by simp [point.zero, point.add]; intro; ext; refl,
+  add_left_neg  := by simp [point.neg, point.zero, point.add],
+}
 
 end point
 
@@ -150,5 +163,31 @@ end
 
 class add_group₂ (α : Type*) :=
 (add : α → α → α)
--- fill in the rest
+(zero : α)
+(neg : α → α)
+(add_assoc : ∀ x y z : α, add (add x y) z = add x (add y z))
+(add_zero : ∀ a : α, add a zero = a)
+(zero_add : ∀ x : α, add zero x = x)
+(add_left_neg : ∀ x : α, add ( neg x) x = zero)
 
+instance has_add_add_group_2 {α : Type*} [add_group₂ α] : has_add α := ⟨add_group₂.add⟩
+
+instance has_zero_add_group_2 {α : Type*} [add_group₂ α] : has_zero α := ⟨add_group₂.zero⟩
+
+instance has_neg_add_group_2 {α : Type*} [add_group₂ α] : has_neg α := ⟨add_group₂.neg⟩
+
+instance has_sub_add_group_2 {α : Type*} [add_group₂ α] : has_sub α := ⟨λ a b : α, add_group₂.add a (add_group₂.neg b)⟩
+
+instance : add_group₂ point := {
+  add := point.add,
+  zero := point.zero,
+  neg := point.neg,
+  add_assoc := by {simp [point.add, add_assoc]},
+  add_zero := by { simp [point.zero, point.add]; intro; ext; refl},
+  zero_add := by { simp [point.zero, point.add]; intro; ext; refl},
+  add_left_neg := by {simp [point.neg, point.zero, point.add]}
+}
+
+variables a b : point
+
+#check a - b + 0
