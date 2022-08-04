@@ -43,8 +43,25 @@ structure heap :=
 
 namespace heap
 
+inductive heap_btree (α : Type ) : Type
+| empty {} : heap_btree
+| node (l: heap_btree) (k: ℕ) (a: α) (r: heap_btree): heap_btree
+
+  namespace heap_btree
+
+  variables {α : Type }
+  def empty_tree : heap_btree α := heap_btree.empty
+
+  def height : heap_btree α -> ℕ 
+  | empty := 0
+  | (node l k a r) := 1 + (max (height l) (height r))
+
+  end heap_btree
+
+
 variables {len size i : ℕ}
 variables {a b  : ℕ}
+variables {α : Type}
 
 def parent (i:ℕ) := ⌊ ( i-1 ) / 2 ⌋₊
 def right (i: ℕ) := 2 * (i + 1)
@@ -57,13 +74,54 @@ def get_item (H : heap ) (i: ℕ) := match H.items.nth i with
 end
 
 
+
+-- def to_tree (lst: list ℕ) (key: ℕ) : heap_btree ℕ := match lst with
+-- | [] := heap_btree.empty
+-- | [x] := heap_btree.node heap_btree.empty key x heap_btree.empty
+-- | (x::xs) := heap_btree.node (left) (key) (x) (right)
+-- end
+-- def to_tree (hp: heap) : heap_btree ℕ := match hp.items with
+-- | []      := heap_btree.empty
+-- | [x]     := heap_btree.node heap_btree.empty 0 x heap_btree.empty
+-- | [p, ] := heap_btree.node (to_tree) 
+-- end
+
 def height (h: heap ) := nat.floor $ nat.log 2 h.items.length
 -- #eval nat.log 2 8
 
-def height_rec (h: heap) := match h.items with 
-| [] := 0
-| (x::xs) := 1
+def tail_children {α : Type} (l: list α) (k: nat)  := match (l.nth k) with
+| none := ([] : list α) 
+| (some α) := l.drop k
 end
+
+--  h             k
+--  [1,2,3,4,5]   0
+--  [_,_,3,4,5]   2
+--  [_,_,_,_,_]   6
+
+--  h             k
+--  [1,2,3,4,5]   0
+--  [_,2,3,4,5]   1
+--  [_,_,_,4,5]   3
+--  [_,_,_,_,_]   7
+#eval left 3
+
+
+def height_rec : list ℕ -> ℕ -> ℕ  
+| ([]) :=λk,  0
+| h := λ k,
+have hL : (list.drop (left k - k) h).sizeof < h.sizeof, from sorry,
+have hR : (list.drop (right k - k) h).sizeof < h.sizeof, from sorry,
+  let L := left k, 
+      Ltree :=  h.drop (L - k),
+      R := right k,
+      Rtree := h.drop (R - k),
+      increment := if k = 0 then 0 else 1
+      -- Rh := height_rec h k
+      in
+      increment + max (height_rec Ltree L ) (height_rec Rtree R)
+       
+
 
 
 end heap
@@ -117,9 +175,12 @@ def h4 : heap := {
   items := [1,2,3,4,5]
 }
 
+#eval h4.items.drop 6
+#eval heap.tail_children h4.items 6
 #eval h4.get_item (heap.parent 3)
 -- #eval h4.get_item 
--- #eval h4.height
+#eval h4.height
+#eval heap.height_rec h4.items 0
 
 -- example { l: list ℕ} (hsorted: sorted l) : 
 
