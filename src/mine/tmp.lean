@@ -4,6 +4,7 @@ import data.nat.basic
 import data.nat.log
 import algebra.order.floor
 
+
 section sorting
 
 inductive sorted : list ℕ -> Prop 
@@ -105,12 +106,54 @@ end
 --  [_,_,_,4,5]   3
 --  [_,_,_,_,_]   7
 #eval left 3
+def tmpList : list ℕ := [1,2,3,4]
+def emptyList : list ℕ := []
+#check sizeof_measure (list ℕ) tmpList []
+-- #eval sizeof_measure (list ℕ) tmpList tmpList
+#eval tmpList.sizeof
+#eval (tmpList.drop 1).sizeof
+
+lemma list_sizeof_eq_length (l : list ℕ ) : l.sizeof = l.length :=
+begin
+  induction l with l' IH,
+  {
+    
+  },
+  
+  -- { 
+  --  -- have : list.nil.sizeof = 0 := sorry,
+  -- have : list.nil.length = 0 := by begin
+  --   simp,
+  -- end,
+  -- },
+  -- _
+end
+
+lemma left_subtree_le {α : Type} [has_sizeof α] (h: list α) (hl : h.length > 0) (k:ℕ ):  (list.drop (left k - k) h).sizeof < h.sizeof := 
+begin 
+  have left_le : left k - k > 0 := by rw [left] ; simp ; linarith,
+  have hsizeof := list.drop_sizeof_le h (left k - k),
+  set n := left k - k,
+  have hneq :( h.drop (n)).length = h.length - n := list.length_drop n h,
+  set ln := list.range n,
+  -- have : list.sizeof (ln) = n := by library_search,
+  have : h.sizeof = h.length := begin 
+    sorry,
+  end,
+  sorry,
+end
 
 
 def height_rec : list ℕ -> ℕ -> ℕ  
 | ([]) :=λk,  0
 | h := λ k,
-have hL : (list.drop (left k - k) h).sizeof < h.sizeof, from sorry,
+have hL : (list.drop (left k - k) h).sizeof < h.sizeof, from begin
+  have : left k > k := sorry,
+  have : left k - k > 0 := sorry,
+  -- apply list.drop_sizeof_le
+
+  
+ end,
 have hR : (list.drop (right k - k) h).sizeof < h.sizeof, from sorry,
   let L := left k, 
       Ltree :=  h.drop (L - k),
